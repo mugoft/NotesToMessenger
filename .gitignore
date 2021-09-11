@@ -1,0 +1,16 @@
+# Ignore everything
+./
+/NotesToMessenger.iml
+/target/
+
+# Not these directories
+!config/
+!src/
+
+# Not these files
+!pom.xml
+!Dockerfile
+!.gitignore
+!Dockerrun.aws.json
+
+/.idea/

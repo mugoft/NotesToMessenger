@@ -1,0 +1,32 @@
+on:
+  push:
+    branches:
+      - master
+
+env:
+  AWS_REGION: eu-central-1
+  AWS_ACCESS_KEY_ID: dummy
+  AWS_SECRET_ACCESS_KEY: dummy
+jobs:
+  test-build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+          # NOT NEEDED AS Sam build executes maven
+#      - name: Run the Maven verify and build phase.
+#        run: |
+#          mvn --batch-mode --update-snapshots clean verify
+#             - uses: aws-actions/setup-sam@v1
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+        # sam build
+      - run: sam build PublishNotesToTelegramFunction
+      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name sam-notes-to-telegram --s3-bucket notes-to-telegram --capabilities CAPABILITY_IAM --region eu-central-1

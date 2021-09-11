@@ -1,0 +1,49 @@
+# Check https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  PublishQuestionAnswerToTelegram
+
+  Sample SAM Template for NotesToMessenger
+
+Resources:
+  PublishNotesToTelegramFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: .
+      Handler: com.mugoft.LambdaHandler.java
+      Runtime: java11
+      Timeout: 60
+      MemorySize: 128
+      Policies:
+        - AWSLambdaExecute
+        - AmazonDynamoDBFullAccess #TODO: specify DynamoDB ARN
+      Architectures:
+        - x86_64
+      Events:
+        ToTelegramEvent:
+          Type: Schedule
+          Properties:
+            Schedule: cron(*/15 17 * * ? *)
+#      Layers:
+#        - !Ref ApkgReaderLayer
+#      Events:
+#        S3AnkiCardsEvent:
+#          Type: S3
+#          Properties:
+#            Bucket: !Ref AnkiCardsBucket
+#            Events: s3:ObjectCreated:*
+#  AnkiCardsBucket:
+#    Type: AWS::S3::Bucket
+#  ApkgReaderLayer:
+#    Type: AWS::Serverless::LayerVersion
+#    Properties:
+#      LayerName: apkg-reader-dependencies
+#      Description: Dependencies required for app to read and clean apkg files
+#      ContentUri: dependencies/
+#      CompatibleRuntimes:
+#        - python3.7
+#        - python3.8
+#        - python3.9
+#      LicenseInfo: 'MIT'
+#      RetentionPolicy: Retain
