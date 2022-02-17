@@ -2,11 +2,13 @@ on:
   push:
     branches:
       - master
+      - modify-sam-config
 
 env:
   AWS_REGION: eu-central-1
   AWS_ACCESS_KEY_ID: dummy
   AWS_SECRET_ACCESS_KEY: dummy
+  MAVEN_OPTS: "-DskipTests=true"
 jobs:
   test-build-deploy:
     runs-on: ubuntu-latest
@@ -17,11 +19,6 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-          # NOT NEEDED AS Sam build executes maven
-#      - name: Run the Maven verify and build phase.
-#        run: |
-#          mvn --batch-mode --update-snapshots clean verify
-#             - uses: aws-actions/setup-sam@v1
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
