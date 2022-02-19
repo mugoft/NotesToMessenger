@@ -4,6 +4,7 @@ import com.mugoft.messengers.telegram.apiwrapper.MessageSenderBot;
 import com.mugoft.notesrepos.aws.ParameterStoreHelper;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
+import org.junit.experimental.categories.Category;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;

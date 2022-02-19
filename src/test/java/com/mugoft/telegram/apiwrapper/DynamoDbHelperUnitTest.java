@@ -10,7 +10,7 @@ import java.time.ZoneOffset;
 
 import static com.mugoft.telegram.apiwrapper.MessageSenderBotIntegrationTest.groupIdChannelTest;
 
-public class DynamoDbHelperIntegrationTest extends AbstractDynamoDbIntegrationTest {
+public class DynamoDbHelperUnitTest extends AbstractDynamoDbUnitTest {
 //    @Test
 //    public void simpleReadFromNotesTest() {
 //        DynamoDbReader dynamoReader = new DynamoDbReader();

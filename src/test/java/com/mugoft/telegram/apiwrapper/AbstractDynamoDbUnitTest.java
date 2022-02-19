@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(PER_CLASS)
-public abstract class AbstractDynamoDbIntegrationTest {
+public abstract class AbstractDynamoDbUnitTest {
 
     public static final String TABLE_NAME_NOTES_TEST = "notes_test";
     public static final String TABLE_NAME_NOTES_STATUS_TEST = "notes_status_test";
