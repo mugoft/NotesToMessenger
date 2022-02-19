@@ -20,16 +20,14 @@ import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static com.mugoft.telegram.apiwrapper.MessageSenderBotIntegrationTest.groupIdChannelTest;
+import static com.mugoft.LambdaHandler.*;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(PER_CLASS)
-public abstract class AbstractDynamoDbIntegrationTest {
+public abstract class AbstractDynamoDbUnitTest {
 
-    public static final String TABLE_NAME_NOTES_TEST = "notes_test";
-    public static final String TABLE_NAME_NOTES_STATUS_TEST = "notes_status_test";
     static Note noteRecordTest;
     static Note noteRecordTest2;
     static NotesStatus notesStatusRecordTest;
@@ -48,22 +46,22 @@ public abstract class AbstractDynamoDbIntegrationTest {
 
 
         DynamoDbClient dynamoDbClient = DynamoDbClient.builder().endpointOverride(uri).build();
-        var tableNameNotes = createTable(dynamoDbClient, TABLE_NAME_NOTES_TEST, Note.getNoteIdName());
-        var tableNameNotesStatus = createTable(dynamoDbClient, TABLE_NAME_NOTES_STATUS_TEST, NotesStatus.getChatIdName(), NotesStatus.getNoteIdName());
-        Assertions.assertEquals(tableNameNotes, TABLE_NAME_NOTES_TEST);
-        Assertions.assertEquals(tableNameNotesStatus, TABLE_NAME_NOTES_STATUS_TEST);
+        var tableNameNotesRet = createTable(dynamoDbClient, tableNameNotes, Note.getNoteIdName());
+        var tableNameNotesStatusRet = createTable(dynamoDbClient, tableNameNotesStatus, NotesStatus.getChatIdName(), NotesStatus.getNoteIdName());
+        Assertions.assertEquals(tableNameNotesRet, tableNameNotes);
+        Assertions.assertEquals(tableNameNotesStatusRet, tableNameNotesStatus);
 
         enhancedClient = DynamoDbEnhancedClient.builder()
                 .dynamoDbClient(dynamoDbClient)
                 .build();
 
-        DynamoDbTable<Note> table = enhancedClient.table(TABLE_NAME_NOTES_TEST, TableSchema.fromBean(Note.class));
+        DynamoDbTable<Note> table = enhancedClient.table(tableNameNotes, TableSchema.fromBean(Note.class));
 
         // Populate the Table
         noteRecordTest = Note.builder().withNoteId(1535693932765L).withMod(1535693932L).withQuestion("QuestionTest").withAnswer("QuestionAnswer").build();
 
         notesStatusRecordTest = new NotesStatus();
-        notesStatusRecordTest.setChat_id(groupIdChannelTest);
+        notesStatusRecordTest.setChat_id(chatIdQuestions);
         notesStatusRecordTest.setLast_asked_time(0L);
         notesStatusRecordTest.setNote_id(noteRecordTest.getNote_id());
 
@@ -74,7 +72,7 @@ public abstract class AbstractDynamoDbIntegrationTest {
                 .build();
 
         notesStatusRecordTest2 = new NotesStatus();
-        notesStatusRecordTest2.setChat_id(groupIdChannelTest);
+        notesStatusRecordTest2.setChat_id(chatIdAnswers);
         notesStatusRecordTest2.setLast_asked_time(0L);
         notesStatusRecordTest2.setNote_id(noteRecordTest2.getNote_id());
 
@@ -93,7 +91,7 @@ public abstract class AbstractDynamoDbIntegrationTest {
         // Add these two items to the table
         enhancedClient.batchWriteItem(batchWriteItemEnhancedRequest);
 
-        DynamoDbTable<NotesStatus> tableNotesStatus = enhancedClient.table(TABLE_NAME_NOTES_STATUS_TEST, TableSchema.fromBean(NotesStatus.class));
+        DynamoDbTable<NotesStatus> tableNotesStatus = enhancedClient.table(tableNameNotesStatus, TableSchema.fromBean(NotesStatus.class));
 
         batchWriteItemEnhancedRequest =
                 BatchWriteItemEnhancedRequest.builder()

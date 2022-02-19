@@ -3,6 +3,7 @@ package com.mugoft;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mugoft.notesrepos.aws.DynamoDbHelper;
@@ -28,23 +29,44 @@ import java.util.stream.Collectors;
 public class LambdaHandler implements RequestHandler<Map<String,String>, String> {
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    public static final String TABLE_NAME_NOTES = "notes";
-    public static final String TABLE_NAME_NOTES_STATUS = "notes_status";
-    public static final Long CHAT_ID_CHANNEL_QUESTIONS = 1001566093710L;
-    public static final Long CHAT_ID_GROUP_ANSWERS = 1001401441309L;
+    public static final String TABLE_NAME_NOTES_ENV_KEY = "NotesTableName";
+    public static final String TABLE_NAME_NOTES_STATUS_ENV_KEY = "NotesStatusTableName";
+    public static final String CHAT_ID_QUESTIONS_ENV_KEY = "ChatIdQuestions";
+    public static final String CHAT_ID_ANSWERS_ENV_KEY = "ChatIdAnswers";
 
     private static final String API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY = "API_TOKEN_MUGOFT_BOT_QUESTIONS";
     private static final String API_TOKEN_MUGOFT_BOT_ANSWERS_KEY = " API_TOKEN_MUGOFT_BOT_ANSWERS";
 
     private static final String BAD_REQUEST = "404";
 
+    public static final String tableNameNotes = getEnvironmentVarSafe(TABLE_NAME_NOTES_ENV_KEY);
+    public static final String tableNameNotesStatus = getEnvironmentVarSafe(TABLE_NAME_NOTES_STATUS_ENV_KEY);
+    public static final Long chatIdQuestions = Long.valueOf(getEnvironmentVarSafe(CHAT_ID_QUESTIONS_ENV_KEY));
+    public static final Long chatIdAnswers = Long.valueOf(getEnvironmentVarSafe(CHAT_ID_ANSWERS_ENV_KEY));
+
+    private static String getEnvironmentVarSafe(String key) {
+        String env = System.getProperty(key);
+        if(Strings.isNullOrEmpty(env)) {
+            System.out.println("No env. variable found for key " + key);
+        }
+        return env;
+    }
+
+//    public LambdaHandler() {
+//         tableNameNotes = System.getenv(TABLE_NAME_NOTES_ENV_KEY);
+//         tableNameNotesStatus = System.getenv(TABLE_NAME_NOTES_STATUS_ENV_KEY);
+//         chatIdQuestions = Long.valueOf(System.getenv(CHAT_ID_QUESTIONS_ENV_KEY));
+//         chatIdAnswers = Long.valueOf(System.getenv(CHAT_ID_ANSWERS_ENV_KEY));
+//    }
+
     @Override
     public String handleRequest(Map<String,String> event, Context context)
     {
         LambdaLogger logger = context.getLogger();
         String response = "200 OK";
-        // log execution details
         logger.log("ENVIRONMENT VARIABLES: " + gson.toJson(System.getenv()));
+        // log execution details
+
         logger.log("CONTEXT: "  + gson.toJson(context));
 
         String apiTokenMugoftBotQuestions = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY);
@@ -56,7 +78,7 @@ public class LambdaHandler implements RequestHandler<Map<String,String>, String>
                     .build();
 
             // find for long time note asked note
-            var notesStatus = DynamoDbHelper.getNotesStatusAskedTimeMin(enhancedClient, CHAT_ID_CHANNEL_QUESTIONS, TABLE_NAME_NOTES_STATUS);
+            var notesStatus = DynamoDbHelper.getNotesStatusAskedTimeMin(enhancedClient, chatIdQuestions, tableNameNotesStatus);
 
             if(notesStatus == null) {
                 logger.log("No notes status for channel found");
@@ -66,7 +88,7 @@ public class LambdaHandler implements RequestHandler<Map<String,String>, String>
             logger.log("Notes status found:" + notesStatus);
 
             // retreive this note
-            var note = DynamoDbHelper.getNote(enhancedClient, TABLE_NAME_NOTES, notesStatus.getNote_id());
+            var note = DynamoDbHelper.getNote(enhancedClient, tableNameNotes, notesStatus.getNote_id());
             if(note == null) {
                 logger.log("No notes for channel found");
                 return BAD_REQUEST;
@@ -75,7 +97,7 @@ public class LambdaHandler implements RequestHandler<Map<String,String>, String>
             logger.log("Note found: " + note);
 
             // send the question from the note to the channel
-            MessageSenderBot sender = new MessageSenderBot(CHAT_ID_CHANNEL_QUESTIONS, apiTokenMugoftBotQuestions);
+            MessageSenderBot sender = new MessageSenderBot(chatIdQuestions, apiTokenMugoftBotQuestions);
             var msgResponse = sender.sendMessage(note.getQuestion(), null);
             if(msgResponse == null || msgResponse.messageId() == null) {
                 logger.log("Message not sent to telegram");
@@ -86,7 +108,7 @@ public class LambdaHandler implements RequestHandler<Map<String,String>, String>
             Long time = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
             notesStatus.setLast_asked_time(time);
 
-            var notesStatusUpdated = DynamoDbHelper.updateNotesStatus(enhancedClient, TABLE_NAME_NOTES_STATUS, notesStatus);
+            var notesStatusUpdated = DynamoDbHelper.updateNotesStatus(enhancedClient, tableNameNotesStatus, notesStatus);
             if(notesStatusUpdated == null || !notesStatusUpdated.getLast_asked_time().equals(time)) {
                 logger.log("Notes status is not updated: " + notesStatusUpdated);
             } else {
@@ -106,7 +128,7 @@ public class LambdaHandler implements RequestHandler<Map<String,String>, String>
                 } catch (Exception ex) {
                     logger.log("Interrupted exception: " + ex);
                 }
-                sender = new MessageSenderBot(CHAT_ID_GROUP_ANSWERS, apiTokenMugoftBotAnswers);
+                sender = new MessageSenderBot(chatIdAnswers, apiTokenMugoftBotAnswers);
                 var updateResponse = sender.getUpdate();
 
                 messages = updateResponse.updates().stream().map(Update::message).filter(msg -> msg.text().equals(note.getQuestion())).collect(Collectors.toList());

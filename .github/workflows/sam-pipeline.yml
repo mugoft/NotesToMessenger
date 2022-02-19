@@ -1,14 +1,43 @@
 on:
   push:
-    tags: ['v[0-9].[0-9]+.[0-9]+']
+    branches:
+      - 'main' # will trigger both tests and deploy to stage environment
+      - 'feature**' # should trigger only tests
+      - 'develop**' # if integration tests are needed before merging to main
+    tags: ['v[0-9].[0-9]+.[0-9]+'] # will trigger both tests and deploy to stage and then prod environment
 
 env:
   AWS_REGION: eu-central-1
   AWS_ACCESS_KEY_ID: dummy
   AWS_SECRET_ACCESS_KEY: dummy
+  PROD_STACK_NAME: sam-notes-to-telegram
+  DEV_STACK_NAME: sam-notes-to-telegram-dev
+  CHAT_ID_QUESTIONS_DEV: 1001581998900
+  CHAT_ID_ANSWERS_DEV: 1001589619062
+  NOTES_TABLE_NAME_DEV: notes_test
+  NOTES_STATUS_TABLE_NAME_DEV: notes_status_test
+  NOTES_TABLE_NAME_PROD: notes
+  NOTES_STATUS_TABLE_NAME_PROD: notes_status
+  CHAT_ID_QUESTIONS_PROD: 1001566093710
+  CHAT_ID_ANSWERS_PROD: 1001401441309
+
   #MAVEN_OPTS:
 jobs:
-  test-build-deploy:
+  unit-test:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - run: |
+          mvn clean test-compile surefire:test -DChatIdQuestions=${CHAT_ID_QUESTIONS_DEV} -DChatIdAnswers=${CHAT_ID_ANSWERS_DEV} -DNotesTableName=${NOTES_TABLE_NAME_DEV} -DNotesStatusTableName=${NOTES_STATUS_TABLE_NAME_DEV} --batch-mode
+  build-deploy-dev:
+    if: ${{!startsWith(github.ref, 'refs/heads/feature')}}
+    needs: [ unit-test ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -23,5 +52,68 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
         # sam build
-      - run: sam build PublishNotesToTelegramFunction
-      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name sam-notes-to-telegram --s3-bucket notes-to-telegram --capabilities CAPABILITY_IAM --region eu-central-1
+      - name: Build again
+        env:
+          MAVEN_OPTS: "-DskipTests=true"
+        run: sam build PublishNotesToTelegramFunction
+      - name: Deploy dev environment
+        env:
+          MAVEN_OPTS: "-DskipTests=true"
+        run: |
+          sam deploy --stack-name ${DEV_STACK_NAME} \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --s3-bucket notes-to-telegram \
+            --capabilities CAPABILITY_IAM \
+            --region ${AWS_REGION} \
+            --parameter-overrides ChatIdQuestions=${CHAT_ID_QUESTIONS_DEV} ChatIdAnswers=${CHAT_ID_ANSWERS_DEV} NotesTableName=${NOTES_TABLE_NAME_DEV} NotesStatusTableName=${NOTES_STATUS_TABLE_NAME_DEV}
+  integration-test:
+    if: github.event_name == 'push'
+    needs: [  build-deploy-dev ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+      - run: |
+          mvn clean test-compile failsafe:integration-test -DChatIdQuestions=${CHAT_ID_QUESTIONS_DEV} -DChatIdAnswers=${CHAT_ID_ANSWERS_DEV} -DNotesTableName=${NOTES_TABLE_NAME_DEV} -DNotesStatusTableName=${NOTES_STATUS_TABLE_NAME_DEV} --batch-mode
+  on-failure:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    needs: [  integration-test ]
+    steps:
+      - run: echo "Integration tests are failed - TODO send an email"
+  build-deploy-prod:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [integration-test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+        # sam build
+#      - run: sam build PublishNotesToTelegramFunction
+      - run: |
+          sam deploy --stack-name ${PROD_STACK_NAME} \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --s3-bucket notes-to-telegram \
+            --capabilities CAPABILITY_IAM \
+            --region ${AWS_REGION} \
+            --parameter-overrides ChatIdQuestions=${CHAT_ID_QUESTIONS_PROD} ChatIdAnswers=${CHAT_ID_ANSWERS_PROD} NotesTableName=${NOTES_TABLE_NAME_PROD} NotesStatusTableName=${NOTES_STATUS_TABLE_NAME_PROD}

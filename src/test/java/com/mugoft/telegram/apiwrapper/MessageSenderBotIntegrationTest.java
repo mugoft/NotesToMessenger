@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
+import static com.mugoft.LambdaHandler.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -22,10 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class MessageSenderBotIntegrationTest {
 
-    public static Long groupIdChannelTest = 1001581998900L;
+//    public static Long groupIdChannelTest = 1001581998900L;
     public static String apiTokenQuestionBotTest = "";
 
-    public static Long groupIdGroupTest = 1001589619062L;
+//    public static Long groupIdGroupTest = 1001589619062L;
     public static String apiTokenAnswerBotTest = "";
 
     private static final String API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY = "API_TOKEN_MUGOFT_BOT_QUESTIONS_TEST";
@@ -36,12 +37,15 @@ public class MessageSenderBotIntegrationTest {
     public static void init() {
         apiTokenQuestionBotTest = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY);
         apiTokenAnswerBotTest = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_ANSWERS_KEY);
+//        System.out.println("ChatID questions: " +  Long.valueOf(System.getenv(CHAT_ID_QUESTIONS_ENV_KEY)));
+//        System.out.println("ChatID answers: " +  Long.valueOf(System.getenv(CHAT_ID_ANSWERS_ENV_KEY)));
     }
 
     @Test
     @Order(1)
     public void simpleMessageTest() {
-        MessageSenderBot sender = new MessageSenderBot(groupIdChannelTest, apiTokenQuestionBotTest);
+
+        MessageSenderBot sender = new MessageSenderBot(chatIdQuestions, apiTokenQuestionBotTest);
         var msgText = "MessageSenderBotIntegrationTest#simpleMessageTest" + LocalDateTime.now();
         var msgResponse = sender.sendMessage(msgText, null);
         Assertions.assertNotNull(msgResponse);
@@ -53,7 +57,7 @@ public class MessageSenderBotIntegrationTest {
     @Test
     @Order(2)
     public void sendMessasgeGetUpdateAddReplyTest() throws InterruptedException {
-        MessageSenderBot sender = new MessageSenderBot(groupIdChannelTest, apiTokenQuestionBotTest);
+        MessageSenderBot sender = new MessageSenderBot(chatIdQuestions, apiTokenQuestionBotTest);
         var msgText = "MessageSenderBotIntegrationTest#getUpdateTest" + LocalDateTime.now();
         // send 2 times
         var msgResponse = sender.sendMessage(msgText, null);
@@ -63,7 +67,7 @@ public class MessageSenderBotIntegrationTest {
 
         // wait a little bit until getUpdate will see the changes
         Thread.sleep(5000);
-        sender = new MessageSenderBot(groupIdGroupTest, apiTokenAnswerBotTest);
+        sender = new MessageSenderBot(chatIdAnswers, apiTokenAnswerBotTest);
         var updateResponse = sender.getUpdate();
         Assertions.assertNotNull(updateResponse);
         assertThat(updateResponse.updates()).isNotNull();

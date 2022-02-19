@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-import static com.mugoft.telegram.apiwrapper.MessageSenderBotIntegrationTest.groupIdChannelTest;
+import static com.mugoft.LambdaHandler.*;
 
-public class DynamoDbHelperIntegrationTest extends AbstractDynamoDbIntegrationTest {
+public class DynamoDbHelperUnitTest extends AbstractDynamoDbUnitTest {
 //    @Test
 //    public void simpleReadFromNotesTest() {
 //        DynamoDbReader dynamoReader = new DynamoDbReader();
@@ -57,17 +57,17 @@ public class DynamoDbHelperIntegrationTest extends AbstractDynamoDbIntegrationTe
     @Order(0)
     @Test
     public void getNextNoteMainChatTest() {
-        var notesStatus = DynamoDbHelper.getNotesStatusAskedTimeMin(enhancedClient, groupIdChannelTest, TABLE_NAME_NOTES_STATUS_TEST);
+        var notesStatus = DynamoDbHelper.getNotesStatusAskedTimeMin(enhancedClient, chatIdQuestions, tableNameNotesStatus);
         Assertions.assertThat(notesStatus).isNotNull();
 
-        var note = DynamoDbHelper.getNote(enhancedClient, TABLE_NAME_NOTES_TEST, notesStatus.getNote_id());
+        var note = DynamoDbHelper.getNote(enhancedClient, tableNameNotes, notesStatus.getNote_id());
         Assertions.assertThat(note.getNote_id()).isEqualTo(noteRecordTest.getNote_id());
     }
 
     @Order(1)
     @Test
     public void getNoteTest() {
-        var note = DynamoDbHelper.getNote(enhancedClient, TABLE_NAME_NOTES_TEST, noteRecordTest.getNote_id());
+        var note = DynamoDbHelper.getNote(enhancedClient, tableNameNotes, noteRecordTest.getNote_id());
         Assertions.assertThat(note).isNotNull();
     }
 
@@ -78,7 +78,7 @@ public class DynamoDbHelperIntegrationTest extends AbstractDynamoDbIntegrationTe
 
         notesStatusRecordTest.setLast_asked_time(time);
 
-        var note = DynamoDbHelper.updateNotesStatus(enhancedClient, TABLE_NAME_NOTES_STATUS_TEST, notesStatusRecordTest);
+        var note = DynamoDbHelper.updateNotesStatus(enhancedClient, tableNameNotesStatus, notesStatusRecordTest);
         Assertions.assertThat(note).isNotNull();
         Assertions.assertThat(note.getLast_asked_time()).isEqualTo(time);
     }
