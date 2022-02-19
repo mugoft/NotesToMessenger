@@ -1,5 +1,9 @@
 on:
   push:
+    branches:
+      - 'main' # will trigger both tests and deploy to prod environment
+      - 'develop**' # will trigger both tests and deploy to stage environment
+      - 'feature**' # should trigger only tests
     tags: ['v[0-9].[0-9]+.[0-9]+']
 
 env:
@@ -8,7 +12,21 @@ env:
   AWS_SECRET_ACCESS_KEY: dummy
   #MAVEN_OPTS:
 jobs:
+  test:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - run: |
+          mvn clean verify
   test-build-deploy:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
