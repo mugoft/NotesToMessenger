@@ -25,25 +25,7 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: cron(*/15 17 * * ? *)
-#      Layers:
-#        - !Ref ApkgReaderLayer
-#      Events:
-#        S3AnkiCardsEvent:
-#          Type: S3
-#          Properties:
-#            Bucket: !Ref AnkiCardsBucket
-#            Events: s3:ObjectCreated:*
-#  AnkiCardsBucket:
-#    Type: AWS::S3::Bucket
-#  ApkgReaderLayer:
-#    Type: AWS::Serverless::LayerVersion
-#    Properties:
-#      LayerName: apkg-reader-dependencies
-#      Description: Dependencies required for app to read and clean apkg files
-#      ContentUri: dependencies/
-#      CompatibleRuntimes:
-#        - python3.7
-#        - python3.8
-#        - python3.9
-#      LicenseInfo: 'MIT'
-#      RetentionPolicy: Retain
+#      Metadata:
+#        BuildMethod: makefile
+    LicenseInfo: 'MIT'
+    RetentionPolicy: Retain
