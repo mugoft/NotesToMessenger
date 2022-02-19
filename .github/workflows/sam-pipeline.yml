@@ -23,7 +23,7 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - run: |
-          mvn clean test --batch-mode
+          mvn clean test-compile surefire:test --batch-mode
   integration-test:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -35,7 +35,7 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - run: |
-          mvn clean failsafe:integration-test --batch-mode
+          mvn clean test-compile failsafe:integration-test --batch-mode
   test-build-deploy:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [unit-test]
