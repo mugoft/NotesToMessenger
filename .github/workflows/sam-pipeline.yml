@@ -49,7 +49,7 @@ jobs:
       - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name ${DEV_STACK_NAME} --s3-bucket notes-to-telegram --capabilities CAPABILITY_IAM --region ${AWS_REGION}
   integration-test:
     if: github.event_name == 'push'
-    needs: [  test-build-deploy-dev ]
+    needs: [  build-deploy-dev ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
