@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.http.SdkHttpClient;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -30,8 +32,9 @@ public class MessageSenderBotIntegrationTest {
 
     @BeforeAll
     public static void init() {
-        apiTokenQuestionBotTest = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY);
-        apiTokenAnswerBotTest = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_ANSWERS_KEY);
+        SdkHttpClient httpClient = ApacheHttpClient.builder().build();
+        apiTokenQuestionBotTest = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY, httpClient);
+        apiTokenAnswerBotTest = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_ANSWERS_KEY, httpClient);
     }
 
     @Test
