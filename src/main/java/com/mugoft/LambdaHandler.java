@@ -45,19 +45,16 @@ public class LambdaHandler implements RequestHandler<Map<String,String>, String>
     public static final Long chatIdAnswers = Long.valueOf(getEnvironmentVarSafe(CHAT_ID_ANSWERS_ENV_KEY));
 
     private static String getEnvironmentVarSafe(String key) {
-        String env = System.getProperty(key);
-        if(Strings.isNullOrEmpty(env)) {
-            System.out.println("No env. variable found for key " + key);
+        String val = System.getenv(key);
+        if(!Strings.isNullOrEmpty(val)) {
+            return val;
+        } else if(!Strings.isNullOrEmpty(val = System.getProperty(key))) {
+            return val;
+        } else {
+            System.out.println("No env. and property  found for key " + key);
+            return null;
         }
-        return env;
     }
-
-//    public LambdaHandler() {
-//         tableNameNotes = System.getenv(TABLE_NAME_NOTES_ENV_KEY);
-//         tableNameNotesStatus = System.getenv(TABLE_NAME_NOTES_STATUS_ENV_KEY);
-//         chatIdQuestions = Long.valueOf(System.getenv(CHAT_ID_QUESTIONS_ENV_KEY));
-//         chatIdAnswers = Long.valueOf(System.getenv(CHAT_ID_ANSWERS_ENV_KEY));
-//    }
 
     @Override
     public String handleRequest(Map<String,String> event, Context context)

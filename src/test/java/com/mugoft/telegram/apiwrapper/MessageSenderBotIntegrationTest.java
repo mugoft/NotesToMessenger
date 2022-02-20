@@ -22,14 +22,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @project NotesToMessenger
  */
 public class MessageSenderBotIntegrationTest {
-
-    public static String apiTokenQuestionBotTest;
-
-    public static String apiTokenAnswerBotTest;
-
     private static final String API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY = "API_TOKEN_MUGOFT_BOT_QUESTIONS_TEST";
     private static final String API_TOKEN_MUGOFT_BOT_ANSWERS_KEY = "API_TOKEN_MUGOFT_BOT_ANSWERS_TEST";
 
+    public static String apiTokenQuestionBotTest;
+    public static String apiTokenAnswerBotTest;
 
     @BeforeAll
     public static void init() {
