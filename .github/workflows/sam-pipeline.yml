@@ -52,13 +52,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
         # sam build
-      - name: Build again
-        env:
-          MAVEN_OPTS: "-DskipTests=true"
-        run: sam build PublishNotesToTelegramFunction
       - name: Deploy dev environment
-        env:
-          MAVEN_OPTS: "-DskipTests=true"
+#        env:
+#          MAVEN_OPTS: "-DskipTests=true"
         run: |
           sam deploy --stack-name ${DEV_STACK_NAME} \
             --no-confirm-changeset \
