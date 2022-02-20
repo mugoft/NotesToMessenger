@@ -11,7 +11,9 @@ import com.mugoft.messengers.telegram.apiwrapper.MessageSenderBot;
 import com.mugoft.notesrepos.aws.ParameterStoreHelper;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import java.time.LocalDateTime;
@@ -59,15 +61,12 @@ public class LambdaHandler implements RequestHandler<Map<String,String>, String>
     @Override
     public String handleRequest(Map<String,String> event, Context context)
     {
+        SdkHttpClient httpClient = ApacheHttpClient.builder().build();
         LambdaLogger logger = context.getLogger();
         String response = "200 OK";
-        logger.log("ENVIRONMENT VARIABLES: " + gson.toJson(System.getenv()));
-        // log execution details
 
-        logger.log("CONTEXT: "  + gson.toJson(context));
-
-        String apiTokenMugoftBotQuestions = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY);
-        String apiTokenMugoftBotAnswers = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_ANSWERS_KEY);
+        String apiTokenMugoftBotQuestions = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY, httpClient);
+        String apiTokenMugoftBotAnswers = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_ANSWERS_KEY, httpClient);
 
         try (DynamoDbClient client = DynamoDbClient.builder().build()) {
             DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
