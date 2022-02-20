@@ -23,11 +23,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class MessageSenderBotIntegrationTest {
 
-//    public static Long groupIdChannelTest = 1001581998900L;
-    public static String apiTokenQuestionBotTest = "";
+    public static String apiTokenQuestionBotTest;
 
-//    public static Long groupIdGroupTest = 1001589619062L;
-    public static String apiTokenAnswerBotTest = "";
+    public static String apiTokenAnswerBotTest;
 
     private static final String API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY = "API_TOKEN_MUGOFT_BOT_QUESTIONS_TEST";
     private static final String API_TOKEN_MUGOFT_BOT_ANSWERS_KEY = "API_TOKEN_MUGOFT_BOT_ANSWERS_TEST";
@@ -37,8 +35,6 @@ public class MessageSenderBotIntegrationTest {
     public static void init() {
         apiTokenQuestionBotTest = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY);
         apiTokenAnswerBotTest = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_ANSWERS_KEY);
-//        System.out.println("ChatID questions: " +  Long.valueOf(System.getenv(CHAT_ID_QUESTIONS_ENV_KEY)));
-//        System.out.println("ChatID answers: " +  Long.valueOf(System.getenv(CHAT_ID_ANSWERS_ENV_KEY)));
     }
 
     @Test
