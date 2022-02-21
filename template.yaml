@@ -29,7 +29,7 @@ Resources:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: .
-      Handler: com.mugoft.LambdaHandler.java
+      Handler: com.mugoft.LambdaHandler::handleRequest
       Runtime: java11
       Timeout: 120
       MemorySize: 512
