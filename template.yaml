@@ -36,6 +36,7 @@ Resources:
       Policies:
         - AWSLambdaExecute
         - AmazonDynamoDBFullAccess #TODO: specify DynamoDB ARN
+        - AmazonSSMReadOnlyAccess
       Architectures:
         - x86_64
       Events:
