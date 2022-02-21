@@ -20,6 +20,10 @@ env:
   NOTES_STATUS_TABLE_NAME_PROD: notes_status
   CHAT_ID_QUESTIONS_PROD: 1001566093710
   CHAT_ID_ANSWERS_PROD: 1001401441309
+  API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY_DEV: API_TOKEN_MUGOFT_BOT_QUESTIONS_TEST
+  API_TOKEN_MUGOFT_BOT_ANSWERS_KEY_DEV: API_TOKEN_MUGOFT_BOT_ANSWERS_TEST
+  API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY_PROD: API_TOKEN_MUGOFT_BOT_QUESTIONS
+  API_TOKEN_MUGOFT_BOT_ANSWERS_KEY_PROD: API_TOKEN_MUGOFT_BOT_ANSWERS
 
   #MAVEN_OPTS:
 jobs:
@@ -34,7 +38,7 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - run: |
-          mvn clean test-compile surefire:test -DChatIdQuestions=${CHAT_ID_QUESTIONS_DEV} -DChatIdAnswers=${CHAT_ID_ANSWERS_DEV} -DNotesTableName=${NOTES_TABLE_NAME_DEV} -DNotesStatusTableName=${NOTES_STATUS_TABLE_NAME_DEV} --batch-mode
+          mvn clean test-compile surefire:test -DChatIdQuestions=${CHAT_ID_QUESTIONS_DEV} -DChatIdAnswers=${CHAT_ID_ANSWERS_DEV} -DNotesTableName=${NOTES_TABLE_NAME_DEV} -DNotesStatusTableName=${NOTES_STATUS_TABLE_NAME_DEV} -DApiTokenMugoftBotQuestionsKey=${API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY_DEV} -DApiTokenMugoftBotAnswersKey=${API_TOKEN_MUGOFT_BOT_ANSWERS_KEY_DEV} --batch-mode
   build-deploy-dev:
     if: ${{!startsWith(github.ref, 'refs/heads/feature')}}
     needs: [ unit-test ]
@@ -64,7 +68,7 @@ jobs:
             --s3-bucket notes-to-telegram \
             --capabilities CAPABILITY_IAM \
             --region ${AWS_REGION} \
-            --parameter-overrides ChatIdQuestions=${CHAT_ID_QUESTIONS_DEV} ChatIdAnswers=${CHAT_ID_ANSWERS_DEV} NotesTableName=${NOTES_TABLE_NAME_DEV} NotesStatusTableName=${NOTES_STATUS_TABLE_NAME_DEV}
+            --parameter-overrides ChatIdQuestions=${CHAT_ID_QUESTIONS_DEV} ChatIdAnswers=${CHAT_ID_ANSWERS_DEV} NotesTableName=${NOTES_TABLE_NAME_DEV} NotesStatusTableName=${NOTES_STATUS_TABLE_NAME_DEV} ApiTokenMugoftBotQuestionsKey=${API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY_DEV} ApiTokenMugoftBotAnswersKey=${API_TOKEN_MUGOFT_BOT_ANSWERS_KEY_DEV}
   integration-test:
     if: github.event_name == 'push'
     needs: [  build-deploy-dev ]
@@ -82,7 +86,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
       - run: |
-          mvn clean test-compile failsafe:integration-test -DChatIdQuestions=${CHAT_ID_QUESTIONS_DEV} -DChatIdAnswers=${CHAT_ID_ANSWERS_DEV} -DNotesTableName=${NOTES_TABLE_NAME_DEV} -DNotesStatusTableName=${NOTES_STATUS_TABLE_NAME_DEV} --batch-mode
+          mvn clean test-compile failsafe:integration-test -DChatIdQuestions=${CHAT_ID_QUESTIONS_DEV} -DChatIdAnswers=${CHAT_ID_ANSWERS_DEV} -DNotesTableName=${NOTES_TABLE_NAME_DEV} -DNotesStatusTableName=${NOTES_STATUS_TABLE_NAME_DEV} -DApiTokenMugoftBotQuestionsKey=${API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY_DEV} -DApiTokenMugoftBotAnswersKey=${API_TOKEN_MUGOFT_BOT_ANSWERS_KEY_DEV} --batch-mode
   on-failure:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
@@ -116,4 +120,4 @@ jobs:
             --s3-bucket notes-to-telegram \
             --capabilities CAPABILITY_IAM \
             --region ${AWS_REGION} \
-            --parameter-overrides ChatIdQuestions=${CHAT_ID_QUESTIONS_PROD} ChatIdAnswers=${CHAT_ID_ANSWERS_PROD} NotesTableName=${NOTES_TABLE_NAME_PROD} NotesStatusTableName=${NOTES_STATUS_TABLE_NAME_PROD}
+            --parameter-overrides ChatIdQuestions=${CHAT_ID_QUESTIONS_PROD} ChatIdAnswers=${CHAT_ID_ANSWERS_PROD} NotesTableName=${NOTES_TABLE_NAME_PROD} NotesStatusTableName=${NOTES_STATUS_TABLE_NAME_PROD} ApiTokenMugoftBotQuestionsKey=${API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY_PROD} ApiTokenMugoftBotAnswersKey=${API_TOKEN_MUGOFT_BOT_ANSWERS_KEY_PROD}

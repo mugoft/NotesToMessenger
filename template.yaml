@@ -18,6 +18,12 @@ Parameters:
   ChatIdQuestions:
     Type: String
     Description: ChatIdQuestions
+  ApiTokenMugoftBotQuestionsKey:
+    Type: String
+    Description: ApiTokenMugoftBotQuestionsKey
+  ApiTokenMugoftBotAnswersKey:
+    Type: String
+    Description: ApiTokenMugoftBotAnswersKey
 Resources:
   PublishNotesToTelegramFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -25,8 +31,8 @@ Resources:
       CodeUri: .
       Handler: com.mugoft.LambdaHandler.java
       Runtime: java11
-      Timeout: 60
-      MemorySize: 128
+      Timeout: 120
+      MemorySize: 512
       Policies:
         - AWSLambdaExecute
         - AmazonDynamoDBFullAccess #TODO: specify DynamoDB ARN
@@ -43,6 +49,8 @@ Resources:
           ChatIdAnswers: !Ref ChatIdAnswers
           NotesTableName: !Ref NotesTableName
           NotesStatusTableName: !Ref NotesStatusTableName
+          ApiTokenMugoftBotQuestionsKey: !Ref ApiTokenMugoftBotQuestionsKey
+          ApiTokenMugoftBotAnswersKey: !Ref ApiTokenMugoftBotAnswersKey
 #      Metadata:
 #        BuildMethod: makefile
     LicenseInfo: 'MIT'

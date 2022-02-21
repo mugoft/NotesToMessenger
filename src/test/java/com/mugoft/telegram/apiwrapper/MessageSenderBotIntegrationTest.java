@@ -1,15 +1,12 @@
 package com.mugoft.telegram.apiwrapper;
 
+import com.mugoft.LambdaHandler;
 import com.mugoft.messengers.telegram.apiwrapper.MessageSenderBot;
-import com.mugoft.notesrepos.aws.ParameterStoreHelper;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import software.amazon.awssdk.http.SdkHttpClient;
-import software.amazon.awssdk.http.apache.ApacheHttpClient;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -24,24 +21,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @project NotesToMessenger
  */
 public class MessageSenderBotIntegrationTest {
-    private static final String API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY = "API_TOKEN_MUGOFT_BOT_QUESTIONS_TEST";
-    private static final String API_TOKEN_MUGOFT_BOT_ANSWERS_KEY = "API_TOKEN_MUGOFT_BOT_ANSWERS_TEST";
-
-    public static String apiTokenQuestionBotTest;
-    public static String apiTokenAnswerBotTest;
-
-    @BeforeAll
-    public static void init() {
-        SdkHttpClient httpClient = ApacheHttpClient.builder().build();
-        apiTokenQuestionBotTest = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY, httpClient);
-        apiTokenAnswerBotTest = ParameterStoreHelper.getParameter(API_TOKEN_MUGOFT_BOT_ANSWERS_KEY, httpClient);
-    }
-
     @Test
     @Order(1)
     public void simpleMessageTest() {
-
-        MessageSenderBot sender = new MessageSenderBot(chatIdQuestions, apiTokenQuestionBotTest);
+        LambdaHandler handler = new LambdaHandler();
+        MessageSenderBot sender = new MessageSenderBot(chatIdQuestions, handler.apiTokenMugoftBotQuestions);
         var msgText = "MessageSenderBotIntegrationTest#simpleMessageTest" + LocalDateTime.now();
         var msgResponse = sender.sendMessage(msgText, null);
         Assertions.assertNotNull(msgResponse);
@@ -53,7 +37,8 @@ public class MessageSenderBotIntegrationTest {
     @Test
     @Order(2)
     public void sendMessasgeGetUpdateAddReplyTest() throws InterruptedException {
-        MessageSenderBot sender = new MessageSenderBot(chatIdQuestions, apiTokenQuestionBotTest);
+        LambdaHandler handler = new LambdaHandler();
+        MessageSenderBot sender = new MessageSenderBot(chatIdQuestions, handler.apiTokenMugoftBotQuestions);
         var msgText = "MessageSenderBotIntegrationTest#getUpdateTest" + LocalDateTime.now();
         // send 2 times
         var msgResponse = sender.sendMessage(msgText, null);
@@ -63,7 +48,7 @@ public class MessageSenderBotIntegrationTest {
 
         // wait a little bit until getUpdate will see the changes
         Thread.sleep(5000);
-        sender = new MessageSenderBot(chatIdAnswers, apiTokenAnswerBotTest);
+        sender = new MessageSenderBot(chatIdAnswers, handler.apiTokenMugoftBotAnswers);
         var updateResponse = sender.getUpdate();
         Assertions.assertNotNull(updateResponse);
         assertThat(updateResponse.updates()).isNotNull();
