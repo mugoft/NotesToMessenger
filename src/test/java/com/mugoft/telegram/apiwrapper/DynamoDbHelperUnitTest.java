@@ -11,48 +11,6 @@ import java.time.ZoneOffset;
 import static com.mugoft.LambdaHandler.*;
 
 public class DynamoDbHelperUnitTest extends AbstractDynamoDbUnitTest {
-//    @Test
-//    public void simpleReadFromNotesTest() {
-//        DynamoDbReader dynamoReader = new DynamoDbReader();
-//        try (DynamoDbClient client = DynamoDbClient.builder().build()) {
-//            HashMap<String, AttributeValue> keyToGet = new HashMap<>();
-//            keyToGet.put("note_id", AttributeValue.builder().n("1535693932765").build());
-//            var noteMap = dynamoReader.getItem(client, TABLE_NAME_NOTES, keyToGet);
-//            Map<String, String> noteMapProcessed = new HashMap<>();
-//            for (var keyset : noteMap.entrySet()) {
-//                noteMapProcessed.put(keyset.getKey(), dynamoReader.getNSValueFromAttributeValue(keyset.getValue()));
-//            }
-//
-//            Assertions.assertThat(noteMapProcessed).isNotNull().isNotEmpty();
-//            Gson gson = new Gson();
-//            JsonElement jsonElement = gson.toJsonTree(noteMapProcessed);
-//            Note note = gson.fromJson(jsonElement, Note.class);
-//            Assertions.assertThat(note.getNote_id()).isEqualTo(1535693932765L);
-//        }
-//    }
-//
-//    @Test
-//    public void simpleReadFromNotesStatusTest() {
-//        DynamoDbReader dynamoReader = new DynamoDbReader();
-//
-//        try (DynamoDbClient client = DynamoDbClient.builder().build()) {
-//            HashMap<String, AttributeValue> keyToGet = new HashMap<>();
-//            keyToGet.put(NotesStatus.getChatIdName(), AttributeValue.builder().n("1001581998900").build());
-//            keyToGet.put(NotesStatus.getNoteIdName(), AttributeValue.builder().n("1535693932765").build());
-//            var noteMap = dynamoReader.getItem(client, TABLE_NAME_NOTES_STATUS, keyToGet);
-//            Map<String, String> noteMapProcessed = new HashMap<>();
-//            for (var keyset : noteMap.entrySet()) {
-//                noteMapProcessed.put(keyset.getKey(), dynamoReader.getNSValueFromAttributeValue(keyset.getValue()));
-//            }
-//
-//            Assertions.assertThat(noteMapProcessed).isNotNull().isNotEmpty();
-//            Gson gson = new Gson();
-//            JsonElement jsonElement = gson.toJsonTree(noteMapProcessed);
-//            Note note = gson.fromJson(jsonElement, Note.class);
-//            Assertions.assertThat(note.getNote_id()).isEqualTo(1535693932765L);
-//        }
-//    }
-
 
     @Order(0)
     @Test
