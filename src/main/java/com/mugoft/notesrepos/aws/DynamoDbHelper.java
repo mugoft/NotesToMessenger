@@ -50,6 +50,8 @@ public class DynamoDbHelper {
         }
     }
 
+    
+
     //TODO: we should find notes with the mininmum time. Currently returns only with 0
     public static NotesStatus getNotesStatusAskedTimeMin(DynamoDbEnhancedClient enhancedClient, Long chatId, String tableName) {
 
@@ -68,6 +70,8 @@ public class DynamoDbHelper {
                     .expression("last_asked_time = :value")
                     .expressionValues(expressionValues)
                     .build();
+
+
 
             // Create a QueryConditional object that is used in the query operation.
             QueryConditional queryConditional = QueryConditional
