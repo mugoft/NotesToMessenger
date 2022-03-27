@@ -156,8 +156,6 @@ public class LambdaHandler implements RequestHandler<Map<String,String>, String>
             }
         }
 
-        logger.log("EVENT: " + gson.toJson(event));
-        logger.log("EVENT TYPE: " + event.getClass());
         return response;
     }
 }
