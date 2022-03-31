@@ -71,6 +71,87 @@ public class LambdaHandler implements RequestHandler<Object, String> {
         LambdaLogger logger = context.getLogger();
         String response = "200 OK";
 
+        try (DynamoDbClient client = DynamoDbClient.builder().build()) {
+            DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
+                    .dynamoDbClient(client)
+                    .build();
+
+            // find for long time note asked note
+            logger.log("Getting notes");
+            var notesStatus = DynamoDbHelper.getNotesStatusAskedTimeMin(enhancedClient, chatIdQuestions, tableNameNotesStatus);
+            logger.log("Getting notes done");
+            if(notesStatus == null) {
+                logger.log("No notes status for channel found");
+                return BAD_REQUEST;
+            }
+
+            logger.log("Notes status found:" + notesStatus);
+
+            // retreive this note
+            var note = DynamoDbHelper.getNote(enhancedClient, tableNameNotes, notesStatus.getNote_id());
+            if(note == null) {
+                logger.log("No notes for channel found");
+                return BAD_REQUEST;
+            }
+
+            logger.log("Note found: " + note);
+
+            // send the question from the note to the channel
+            MessageSenderBot sender = new MessageSenderBot(chatIdQuestions, apiTokenMugoftBotQuestions);
+            var msgResponse = sender.sendMessage(note.getQuestion(), null);
+            if(msgResponse == null || msgResponse.messageId() == null) {
+                logger.log("Message not sent to telegram");
+                return BAD_REQUEST;
+            }
+
+            // update last asked time for this note to the current one
+            Long time = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+            notesStatus.setLast_asked_time(time);
+
+            var notesStatusUpdated = DynamoDbHelper.updateNotesStatus(enhancedClient, tableNameNotesStatus, notesStatus);
+            if(notesStatusUpdated == null || !notesStatusUpdated.getLast_asked_time().equals(time)) {
+                logger.log("Notes status is not updated: " + notesStatusUpdated);
+            } else {
+                logger.log("Updated notes status: " + notesStatusUpdated);
+            }
+
+            // find this question in the the discussion group
+            final int N_ATTEMPTS_MAX = 5;
+            int curAttempt = 0;
+
+            List<Message> messages = null;
+            while (curAttempt++ < N_ATTEMPTS_MAX && (messages == null || messages.isEmpty())) {
+                //TODO: find only one message by ID
+                logger.log("Getting messages from discussion chat, attempt=" + curAttempt);
+                try {
+                    Thread.sleep(3000);
+                } catch (Exception ex) {
+                    logger.log("Interrupted exception: " + ex);
+                }
+                sender = new MessageSenderBot(chatIdAnswers, apiTokenMugoftBotAnswers);
+                var updateResponse = sender.getUpdate();
+
+                messages = updateResponse.updates().stream().map(Update::message).filter(msg -> msg.text().equals(note.getQuestion())).collect(Collectors.toList());
+            }
+
+            if(messages == null || messages.isEmpty()) {
+                logger.log("No messages in discussion chat are found");
+                return BAD_REQUEST;
+            }
+
+            logger.log("Following messages are found: " +  messages);
+
+            // if multiple messages found, get with the highest ID
+            var message = messages.stream().max(Comparator.comparing(Message::messageId));
+
+            // reply to this message with the answer. By this you add comment to the main question channel.
+            var msgReplyResponse = sender.sendMessage(note.getAnswer(), message.get().messageId());
+            logger.log("Replying to the messageId " + message.get().messageId());
+
+            if(msgReplyResponse != null && msgReplyResponse.replyToMessage() != null && msgReplyResponse.replyToMessage().messageId().equals(message.get().messageId())) {
+                logger.log("Success");
+            }
+        }
 
         return response;
     }
