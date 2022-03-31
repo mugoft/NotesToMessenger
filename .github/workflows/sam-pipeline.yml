@@ -115,6 +115,7 @@ jobs:
         run: sam build PublishNotesToTelegramFunction
       - run: |
           sam deploy --stack-name ${PROD_STACK_NAME} \
+            --force-upload \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --s3-bucket notes-to-telegram \
