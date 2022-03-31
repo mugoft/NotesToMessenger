@@ -40,7 +40,7 @@ jobs:
       - run: |
           mvn clean test-compile surefire:test -DChatIdQuestions=${CHAT_ID_QUESTIONS_DEV} -DChatIdAnswers=${CHAT_ID_ANSWERS_DEV} -DNotesTableName=${NOTES_TABLE_NAME_DEV} -DNotesStatusTableName=${NOTES_STATUS_TABLE_NAME_DEV} -DApiTokenMugoftBotQuestionsKey=${API_TOKEN_MUGOFT_BOT_QUESTIONS_KEY_DEV} -DApiTokenMugoftBotAnswersKey=${API_TOKEN_MUGOFT_BOT_ANSWERS_KEY_DEV} --batch-mode
   build-deploy-dev:
-    if: ${{!startsWith(github.ref, 'refs/heads/feature')}}
+    if: ${{!startsWith(github.ref, 'refs/heads/sfeature')}}
     needs: [ unit-test ]
     runs-on: ubuntu-latest
     steps:
