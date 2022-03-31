@@ -43,7 +43,7 @@ Resources:
         ToTelegramEvent:
           Type: Schedule
           Properties:
-            Schedule: cron(*/15 17 * * ? *)
+            Schedule: cron(*/1 20 * * ? *)
       Environment:
         Variables:
           ChatIdQuestions: !Ref ChatIdQuestions
