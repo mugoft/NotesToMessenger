@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * @created 12/09/2021 - 21:47
  * @project NotesToMessenger
  */
-public class LambdaHandler implements RequestHandler<Object, String> {
+public class LambdaHandler implements RequestHandler<Object, Object> {
     public static final String TABLE_NAME_NOTES_ENV_KEY = "NotesTableName";
     public static final String TABLE_NAME_NOTES_STATUS_ENV_KEY = "NotesStatusTableName";
     public static final String CHAT_ID_QUESTIONS_ENV_KEY = "ChatIdQuestions";
@@ -68,7 +68,7 @@ public class LambdaHandler implements RequestHandler<Object, String> {
     }
 
     @Override
-    public String handleRequest(Object event, Context context)
+    public Object handleRequest(Object event, Context context)
     {
         LambdaLogger logger = context.getLogger();
         String response = "200 OK";
