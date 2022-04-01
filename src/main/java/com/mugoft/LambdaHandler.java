@@ -79,6 +79,7 @@ public class LambdaHandler implements RequestHandler<Object, Object> {
                     .build();
 
             // find for long time note asked note
+            logger.log("Looking for long time note asked note");
             var notesStatus = DynamoDbHelper.getNotesStatusAskedTimeMin(enhancedClient, chatIdQuestions, tableNameNotesStatus);
 
             if(notesStatus == null) {
